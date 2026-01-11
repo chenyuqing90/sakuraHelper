@@ -5,27 +5,23 @@ const { Client, Events, GatewayIntentBits } = require('discord.js');
 // const token = process.env.DISCORD_TOKEN;
 // const token = require('./config.json').token;
 
-let token = process.DISCORD_TOKEN;
-// 去除可能的引號和空格（Railway 有時會自動加上）
-token = token.trim().replace(/^["']|["']$/g, '');
+// 直接讀環境變數，不讀 config.json
+let token = process.env.DISCORD_TOKEN;
 
 if (!token) {
-  try {
-    token = require('./config.json').token;
-    console.log('📝 使用本地 config.json');
-  } catch (error) {
-    console.error('❌ 找不到 Token！');
-    process.exit(1);
-  }
+  console.error('❌ 找不到 Discord Token！請確認 Railway Variable 已正確設置並 Redeploy');
+  process.exit(1);
 }
 
+// 去除空格或引號（防止 UI 加上）
+token = token.trim().replace(/^["']|["']$/g, '');
+
 // 除錯
-console.log('==================== Token 檢查 ====================');
 console.log('Token 長度:', token.length);
 console.log('Token 前 10 字元:', token.substring(0, 10));
 console.log('Token 最後 10 字元:', token.substring(token.length - 10));
-console.log('Token 是否包含引號:', token.includes('"') || token.includes("'") ? '是' : '否');
-console.log('==================================================');
+
+client.login(token);
 // ===== 除錯結束 =====
 
 // 優先使用環境變數，本地開發才用 config.json
