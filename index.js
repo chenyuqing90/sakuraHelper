@@ -1,6 +1,9 @@
 // Require the necessary discord.js classes
 const { Client, Events, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+
+// 優先使用環境變數，本地開發才用 config.json
+const token = process.env.DISCORD_TOKEN || require('./config.json').token;
+
 const cron = require('node-cron');
 
 // Create a new client instance
