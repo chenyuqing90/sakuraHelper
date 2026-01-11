@@ -2,7 +2,8 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 
 // 優先使用環境變數，本地開發才用 config.json
-const token = process.env.DISCORD_TOKEN || require('./config.json').token;
+const token = process.env.DISCORD_TOKEN;
+// const token = require('./config.json').token;
 
 const cron = require('node-cron');
 
