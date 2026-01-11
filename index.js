@@ -6,25 +6,7 @@ const { Client, Events, GatewayIntentBits } = require('discord.js');
 // const token = require('./config.json').token;
 
 // 直接讀環境變數，不讀 config.json
-let token = process.env.DISCORD_TOKEN;
-
-if (!token) {
-  console.error('❌ 找不到 Discord Token！請確認 Railway Variable 已正確設置並 Redeploy');
-  process.exit(1);
-}
-
-// 去除空格或引號（防止 UI 加上）
-// token = token.trim().replace(/^["']|["']$/g, '');
-
-// 除錯
-console.log('Token 長度:', token.length);
-console.log('Token 前 10 字元:', token.substring(0, 10));
-console.log('Token 最後 10 字元:', token.substring(token.length - 10));
-
-// ===== 除錯結束 =====
-
-// 優先使用環境變數，本地開發才用 config.json
-// let token = process.env.DISCORD_TOKEN;
+const token = process.env.DISCORD_TOKEN;
 
 if (!token) {
   try {
@@ -69,18 +51,31 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.error('找不到指定的伺服器');
     return;
   }
+
+  // 發送啟動訊息到點名區
+  try {
+    const regularChannel = await guild.channels.fetch(regularChannelId);
+    if (regularChannel) {
+      await regularChannel.send('哈囉我是紀錄任務貼文活躍程度的助手！之後發佈完後若有錯誤請隨時提出，希望我們能一起加油！(ﾉ>ω<)ﾉ');
+      console.log('✅ 啟動訊息已發送');
+    }
+  } catch (error) {
+    console.error('❌ 發送啟動訊息失敗:', error);
+  }
   
   // 啟動後立即執行檢查
-  await checkForumActivity(guild, taskChannelId);
+  // await checkForumActivity(guild, taskChannelId);
 });
 
 // 每週日晚上 10 點執行檢查
-// cron.schedule('0 22 * * 0', () => {
-//   const guild = client.guilds.cache.first();
-//   checkForumActivity(guild, taskChannelId);
-// }, {
-//   timezone: "Asia/Taipei"
-// });
+cron.schedule('0 22 * * 0', () => {
+  const guildId = '1456478177496141927'; // 你的日語交流群 ID
+  const guild = readyClient.guilds.cache.get(guildId);
+
+  checkForumActivity(guild, taskChannelId);
+}, {
+  timezone: "Asia/Taipei"
+});
 
 async function checkForumActivity(guild, forumChannelId) {
   try {
@@ -165,10 +160,10 @@ async function checkForumActivity(guild, forumChannelId) {
     report += `\n新的一週還讓我們一起加油！`;
 
     // 發送報告到指定頻道（測試期間註解）
-    // const regularChannel = await guild.channels.fetch(regularChannelId);
-    // const rollCallChannel = await guild.channels.fetch(rollCallChannelId);
-    // await regularChannel.send(report);
-    // await rollCallChannel.send(report);
+    const regularChannel = await guild.channels.fetch(regularChannelId);
+    const rollCallChannel = await guild.channels.fetch(rollCallChannelId);
+    await regularChannel.send(report);
+    await rollCallChannel.send(report);
     
     // 測試階段先輸出到控制台
     console.log('=== 報告內容 ===');
