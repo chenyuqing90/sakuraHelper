@@ -6,6 +6,8 @@ const { Client, Events, GatewayIntentBits } = require('discord.js');
 // const token = require('./config.json').token;
 
 let token = process.env.DISCORD_TOKEN;
+// 去除可能的引號和空格（Railway 有時會自動加上）
+token = token.trim().replace(/^["']|["']$/g, '');
 
 if (!token) {
   try {
@@ -16,9 +18,6 @@ if (!token) {
     process.exit(1);
   }
 }
-
-// 去除可能的引號和空格（Railway 有時會自動加上）
-token = token.trim().replace(/^["']|["']$/g, '');
 
 // 除錯
 console.log('==================== Token 檢查 ====================');
