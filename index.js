@@ -3,10 +3,10 @@ const { Client, Events, GatewayIntentBits } = require('discord.js');
 
 // 優先使用環境變數，本地開發才用 config.json
 // const token = process.env.DISCORD_TOKEN;
-// const token = require('./config.json').token;
+const token = require('./config.json').token;
 
 // 直接讀環境變數，不讀 config.json
-const token = process.env.DISCORD_TOKEN;
+// const token = process.env.DISCORD_TOKEN;
 
 if (!token) {
   try {
@@ -56,6 +56,9 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.error('找不到指定的伺服器');
     return;
   }
+
+  // 本地端立刻執行專用
+  // checkForumActivity(guild, taskChannelId);
   
   // 啟動後立即執行檢查
   // await checkForumActivity(guild, taskChannelId);
@@ -82,21 +85,18 @@ async function checkForumActivity(guild, forumChannelId) {
 
     // 獲取一週前的時間
     const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 6);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
     // 先載入所有成員（重要！）
     await guild.members.fetch();
     console.log(`伺服器總成員數: ${guild.memberCount}`);
 
     // 獲取所有貼文(threads)
-    const threads = await forumChannel.threads.fetchActive();
-    const archivedThreads = await forumChannel.threads.fetchArchived();
+    const threads = await forumChannel.threads.fetchActive();  // 抓取活躍貼文
+    const archivedThreads = await forumChannel.threads.fetchArchived();  // 抓取封存貼文
     const allThreads = new Map([...threads.threads, ...archivedThreads.threads]);
 
-    // 過濾出過去一週的貼文
-    const recentThreads = Array.from(allThreads.values()).filter(thread => 
-      thread.createdTimestamp > oneWeekAgo.getTime()
-    );
+    // console.log(`總共有 ${allThreads.size} 篇貼文要檢查`);
 
     // 獲取所有能看到此頻道的成員
     const allMembers = guild.members.cache.filter(member => 
@@ -105,28 +105,45 @@ async function checkForumActivity(guild, forumChannelId) {
     );
     console.log(`總共有 ${allMembers.size} 位成員可以看到此頻道`);
 
-    // 追蹤發過貼文和留過言的成員
+    // 追蹤本週發過貼文和留過言的成員
     const membersWhoPosted = new Set();
     const membersWhoCommented = new Set();
 
     // 檢查每個貼文
-    for (const thread of recentThreads) {
-      // 貼文作者
-      membersWhoPosted.add(thread.ownerId);
+    for (const thread of allThreads.values()) {
+      // console.log(`\n檢查貼文：${thread.name}`);
 
-      // 獲取貼文中的所有留言
+      // 如果貼文是本週發布的，記錄作者
+      if (thread.createdTimestamp > oneWeekAgo.getTime()) {
+        membersWhoPosted.add(thread.ownerId);
+        // console.log(`  ✓ 本週貼文，作者: ${thread.ownerId}`);
+      }
+
+      // 獲取最近的留言（可能需要分批抓取）
       const messages = await thread.messages.fetch({ limit: 100 });
+      
+      let recentCommentCount = 0;
+      
       messages.forEach(msg => {
-        if (!msg.author.bot) {
+        // 只統計過去一週內的留言
+        if (msg.createdTimestamp > oneWeekAgo.getTime() && !msg.author.bot) {
           membersWhoCommented.add(msg.author.id);
+          recentCommentCount++;
+          // console.log(`  - ${msg.author.displayName} 在 ${new Date(msg.createdTimestamp).toLocaleDateString('zh-TW')} 留言`);
         }
       });
+      
     }
 
-    // 找出沒發貼文也沒留言的成員(兩者都沒做到)
-    const inactiveMembers = Array.from(allMembers.values()).filter(member => 
-      !membersWhoPosted.has(member.id) && !membersWhoCommented.has(member.id)
-    );
+    // 找出本週「既沒發文也沒留言」的成員
+    const inactiveMembers = Array.from(allMembers.values()).filter(member => {
+      const hasPosted = membersWhoPosted.has(member.id);
+      const hasCommented = membersWhoCommented.has(member.id);
+      
+      // 兩者都沒做才算未活躍
+      return !hasPosted && !hasCommented;
+    });
+
 
     // 格式化日期
     const startDate = oneWeekAgo.toLocaleDateString('zh-TW', { 
@@ -163,7 +180,7 @@ async function checkForumActivity(guild, forumChannelId) {
     console.log('=== 報告內容 ===');
     console.log(report);
     console.log('================');
-    console.log(`本週共有 ${recentThreads.length} 篇貼文`);
+    console.log(`本週共有 ${membersWhoPosted.size} 篇貼文`);
     console.log(`未活躍成員: ${inactiveMembers.length} 人`);
 
   } catch (error) {
