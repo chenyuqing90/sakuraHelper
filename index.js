@@ -2,8 +2,37 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 
 // 優先使用環境變數，本地開發才用 config.json
-const token = process.env.DISCORD_TOKEN;
+// const token = process.env.DISCORD_TOKEN;
 // const token = require('./config.json').token;
+
+// ===== 除錯開始 =====
+console.log('==================== 除錯資訊 ====================');
+console.log('所有環境變數:', Object.keys(process.env));
+console.log('DISCORD_TOKEN 是否存在:', 'DISCORD_TOKEN' in process.env);
+console.log('DISCORD_TOKEN 的值:', process.env.DISCORD_TOKEN ? '已設定' : '未設定');
+console.log('DISCORD_TOKEN 長度:', process.env.DISCORD_TOKEN ? process.env.DISCORD_TOKEN.length : 0);
+console.log('DISCORD_TOKEN 類型:', typeof process.env.DISCORD_TOKEN);
+
+if (process.env.DISCORD_TOKEN) {
+  console.log('Token 前 10 個字元:', process.env.DISCORD_TOKEN.substring(0, 10));
+  console.log('Token 有沒有空格:', process.env.DISCORD_TOKEN.includes(' ') ? '有空格！' : '無空格');
+  console.log('Token 有沒有換行:', process.env.DISCORD_TOKEN.includes('\n') ? '有換行！' : '無換行');
+}
+console.log('==================================================');
+// ===== 除錯結束 =====
+
+// 優先使用環境變數，本地開發才用 config.json
+let token = process.env.DISCORD_TOKEN;
+
+if (!token) {
+  try {
+    token = require('./config.json').token;
+    console.log('📝 使用本地 config.json');
+  } catch (error) {
+    console.error('❌ 找不到 Token！');
+    process.exit(1);
+  }
+}
 
 const cron = require('node-cron');
 
