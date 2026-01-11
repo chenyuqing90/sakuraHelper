@@ -14,14 +14,13 @@ if (!token) {
 }
 
 // 去除空格或引號（防止 UI 加上）
-token = token.trim().replace(/^["']|["']$/g, '');
+// token = token.trim().replace(/^["']|["']$/g, '');
 
 // 除錯
 console.log('Token 長度:', token.length);
 console.log('Token 前 10 字元:', token.substring(0, 10));
 console.log('Token 最後 10 字元:', token.substring(token.length - 10));
 
-client.login(token);
 // ===== 除錯結束 =====
 
 // 優先使用環境變數，本地開發才用 config.json
