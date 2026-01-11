@@ -39,9 +39,14 @@ const rollCallChannelId = '1456524636027093164';
 // 任務計劃區 1456522123286810799
 const taskChannelId = '1456522123286810799';
 
+// 在 ClientReady 外面先宣告
+let botClient;
+
 // 機器人啟動
 client.once(Events.ClientReady, async (readyClient) => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+
+  botClient = readyClient; // 儲存 client 參考
 
   // 方法 1: 使用特定伺服器 ID（推薦）
   const guildId = '1456478177496141927'; // 你的日語交流群 ID
@@ -51,17 +56,6 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.error('找不到指定的伺服器');
     return;
   }
-
-  // 發送啟動訊息到點名區
-  try {
-    const regularChannel = await guild.channels.fetch(regularChannelId);
-    if (regularChannel) {
-      await regularChannel.send('哈囉我是紀錄任務貼文活躍程度的助手！之後發佈完後若有錯誤請隨時提出，希望我們能一起加油！(ﾉ>ω<)ﾉ');
-      console.log('✅ 啟動訊息已發送');
-    }
-  } catch (error) {
-    console.error('❌ 發送啟動訊息失敗:', error);
-  }
   
   // 啟動後立即執行檢查
   // await checkForumActivity(guild, taskChannelId);
@@ -70,7 +64,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 // 每週日晚上 10 點執行檢查
 cron.schedule('0 22 * * 0', () => {
   const guildId = '1456478177496141927'; // 你的日語交流群 ID
-  const guild = readyClient.guilds.cache.get(guildId);
+  const guild = botClient.guilds.cache.get(guildId);
 
   checkForumActivity(guild, taskChannelId);
 }, {
