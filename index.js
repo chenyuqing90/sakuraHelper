@@ -1,12 +1,13 @@
 // Require the necessary discord.js classes
 const { Client, Events, GatewayIntentBits } = require('discord.js');
+const { dateTimeOptions } = require('./const');
 
 // 優先使用環境變數，本地開發才用 config.json
 // const token = process.env.DISCORD_TOKEN;
 // const token = require('./config.json').token;
 
 // 直接讀環境變數，不讀 config.json
-const token = process.env.DISCORD_TOKEN;
+let token = process.env.DISCORD_TOKEN;
 
 if (!token) {
   try {
@@ -146,16 +147,8 @@ async function checkForumActivity(guild, forumChannelId) {
 
 
     // 格式化日期
-    const startDate = oneWeekAgo.toLocaleDateString('zh-TW', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    const endDate = new Date().toLocaleDateString('zh-TW', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    const startDate = oneWeekAgo.toLocaleDateString('zh-TW', dateTimeOptions);
+    const endDate = new Date().toLocaleDateString('zh-TW', dateTimeOptions);
 
     // 建立報告
     let report = `各位，${startDate} ~ ${endDate} 尚未在 <#${taskChannelId}> 發佈貼文＆打卡的朋友：\n`;
