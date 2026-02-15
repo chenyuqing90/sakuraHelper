@@ -72,7 +72,7 @@ cron.schedule('0 22 * * 0', () => {
 
   // 春節期間暫時註解，先發個新年快樂的訊息（之後要恢復檢查論壇活躍度）
   // checkForumActivity(guild, taskChannelId);
-  happyNewYear();
+  // happyNewYear();
 }, {
   timezone: "Asia/Taipei"
 });
