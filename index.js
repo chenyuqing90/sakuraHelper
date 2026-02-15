@@ -70,7 +70,9 @@ cron.schedule('0 22 * * 0', () => {
   const guildId = '1456478177496141927'; // 你的日語交流群 ID
   const guild = botClient.guilds.cache.get(guildId);
 
-  checkForumActivity(guild, taskChannelId);
+  // 春節期間暫時註解，先發個新年快樂的訊息（之後要恢復檢查論壇活躍度）
+  // checkForumActivity(guild, taskChannelId);
+  happyNewYear();
 }, {
   timezone: "Asia/Taipei"
 });
@@ -179,6 +181,12 @@ async function checkForumActivity(guild, forumChannelId) {
   } catch (error) {
     console.error('檢查論壇活躍度時發生錯誤:', error);
   }
+}
+
+async function happyNewYear() {
+  const report = `🎉🎉🎉 新年快樂！祝大家在新的一年裡學習進步，身體健康，事事順心！🎉🎉🎉\n這週和下週不點名了，大家過好年～`;
+  const regularChannel = await guild.channels.fetch(regularChannelId);
+  await regularChannel.send(report);
 }
 
 // Log in to Discord with your client's token
