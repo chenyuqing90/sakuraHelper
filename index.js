@@ -184,7 +184,8 @@ async function checkForumActivity(guild, forumChannelId) {
 }
 
 async function happyNewYear() {
-  const report = `🎉🎉🎉 新年快樂！祝大家在新的一年裡學習進步，身體健康，事事順心！🎉🎉🎉\n這週和下週不點名了，大家過好年～`;
+  const guild = botClient.guilds.cache.get('1456478177496141927'); // ✅ 獲取 guild 物件
+  const report = `🎉🎉🎉 春節即將結束，新的一年繼續加油！`;
   const regularChannel = await guild.channels.fetch(regularChannelId);
   await regularChannel.send(report);
 }
